@@ -4,29 +4,54 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using WebApplication1.Models;
 
 namespace WebApplication1.Controllers {
     public class ValuesController : ApiController {
+        const int InvalidListIndex = -1;
+
+        IBooksContext booksContext = FakeBooksContext.Create();
+
         // GET api/values
-        public IEnumerable<string> Get() {
-            return new string[] { "value1", "value2" };
+        public IEnumerable<Book> GetBooks() {
+            return booksContext.Books;
         }
 
         // GET api/values/5
-        public string Get(int id) {
-            return "value";
+        public Book GetBook(int id) {
+            return booksContext.Books.SingleOrDefault(b => b.Id == id);
         }
 
         // POST api/values
-        public void Post([FromBody]string value) {
+        [HttpPost]
+        public void CreateBook([FromBody]Book book) {
+            booksContext.Books.Add(book);
         }
 
         // PUT api/values/5
-        public void Put(int id, [FromBody]string value) {
+        [HttpPut]
+        public void EditBuuk(int id, [FromBody]Book book) {
+            if(id != book.Id)
+                return;
+            var listIndex = GetBookListIndex(id);
+            if(listIndex == InvalidListIndex)
+                return;
+            booksContext.Books[listIndex] = book; 
         }
 
         // DELETE api/values/5
-        public void Delete(int id) {
+        public void DeleteBook(int id) {
+            var listIndex = GetBookListIndex(id);
+            if(listIndex == InvalidListIndex)
+                return;
+            booksContext.Books.RemoveAt(listIndex);
+        }
+
+        int GetBookListIndex(int id) {
+            var book = GetBook(id);
+            if(book == null)
+                return InvalidListIndex;
+            return booksContext.Books.IndexOf(book);
         }
     }
 }
