@@ -9,10 +9,19 @@ namespace WebApplication1.Models {
             Books = new List<Book>();
         }
 
+        public int InvalidListIndex => -1;
         public IList<Book> Books { get; }
 
+        static IBooksContext instance;
+        public static IBooksContext Instance {
+            get {
+                if(instance == null)
+                    instance = CreateWithFakeValues();
+                return instance;
+            }
+        }
 
-        public static IBooksContext Create() {
+        static IBooksContext CreateWithFakeValues() {
             var context = new FakeBooksContext();
             context.Books.Add(new Book() {
                 Id = 0,
@@ -30,6 +39,7 @@ namespace WebApplication1.Models {
     }
 
     public interface IBooksContext {
+        int InvalidListIndex { get; }
         IList<Book> Books { get; }
     }
 }

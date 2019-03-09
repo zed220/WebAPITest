@@ -8,9 +8,7 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Controllers {
     public class BooksController : ApiController {
-        const int InvalidListIndex = -1;
-
-        IBooksContext booksContext = FakeBooksContext.Create();
+        IBooksContext booksContext = FakeBooksContext.Instance;
 
         // GET api/books
         public IEnumerable<Book> GetBooks() {
@@ -21,7 +19,7 @@ namespace WebApplication1.Controllers {
         public IHttpActionResult GetBook(int id) {
             var book = GetBookCore(id);
             if(book == null)
-                return BadRequest();
+                return BadRequest(GetNotFoundErrorText(id));
             return Ok(book);
         }
 
@@ -30,27 +28,33 @@ namespace WebApplication1.Controllers {
         public IHttpActionResult CreateBook([FromBody]Book book) {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            if(GetBookListIndex(book.Id) != booksContext.InvalidListIndex)
+                return BadRequest($"Book with Id={book.Id} already created.");
             booksContext.Books.Add(book);
+
             return Ok();
         }
 
         // PUT api/books/5
         [HttpPut]
-        public void EditBook(int id, [FromBody]Book book) {
+        public IHttpActionResult EditBook(int id, [FromBody]Book book) {
             if(id != book.Id)
-                return;
+                return BadRequest($"Target Id={id} does not equal book's Id={book.Id}.");
             var listIndex = GetBookListIndex(id);
-            if(listIndex == InvalidListIndex)
-                return;
-            booksContext.Books[listIndex] = book; 
+            if(listIndex == booksContext.InvalidListIndex)
+                return BadRequest(GetNotFoundErrorText(id));
+            booksContext.Books[listIndex] = book;
+            return Ok();
         }
 
         // DELETE api/books/5
-        public void DeleteBook(int id) {
+        public IHttpActionResult DeleteBook(int id) {
             var listIndex = GetBookListIndex(id);
-            if(listIndex == InvalidListIndex)
-                return;
+            if(listIndex == booksContext.InvalidListIndex)
+                return BadRequest(GetNotFoundErrorText(id));
             booksContext.Books.RemoveAt(listIndex);
+            return Ok();
         }
 
         Book GetBookCore(int id) {
@@ -59,8 +63,9 @@ namespace WebApplication1.Controllers {
         int GetBookListIndex(int id) {
             var book = GetBookCore(id);
             if(book == null)
-                return InvalidListIndex;
+                return booksContext.InvalidListIndex;
             return booksContext.Books.IndexOf(book);
         }
+        static string GetNotFoundErrorText(int id) => $"Book with Id={id} not found.";
     }
 }

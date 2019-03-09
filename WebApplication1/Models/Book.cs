@@ -6,8 +6,8 @@ using System.Web;
 
 namespace WebApplication1.Models {
     public class Book {
-
-        public int Id { get; set; }
+        [Range(0, int.MaxValue)]
+        public int Id { get; set; } = -1;
         [Required, StringLength(30)]
         public string Caption { get; set; }
         [Required, MinLength(1)]
