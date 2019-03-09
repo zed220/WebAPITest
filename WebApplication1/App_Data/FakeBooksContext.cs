@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using WebApplication1.Models;
 
-namespace WebApplication1.Models {
+namespace WebApplication1.App_Data {
     public class FakeBooksContext : IBooksContext {
         FakeBooksContext() {
             Books = new List<Book>();

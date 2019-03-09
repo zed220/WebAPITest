@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using WebApplication1.App_Code;
 
 namespace WebApplication1.Models {
     public class Book {
@@ -18,6 +19,7 @@ namespace WebApplication1.Models {
         public int Year { get; set; }
         [StringLength(30)]
         public string Publisher { get; set; }
+        [CustomValidation(typeof(Validator_ISBN), nameof(Validator_ISBN.Check))]
         public string ISBN { get; set; }//req, valid mask, valid net
     }
 }

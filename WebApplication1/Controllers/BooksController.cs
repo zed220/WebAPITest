@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using WebApplication1.App_Data;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers {
@@ -66,6 +67,7 @@ namespace WebApplication1.Controllers {
                 return booksContext.InvalidListIndex;
             return booksContext.Books.IndexOf(book);
         }
+
         static string GetNotFoundErrorText(int id) => $"Book with Id={id} not found.";
     }
 }
