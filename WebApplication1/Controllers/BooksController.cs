@@ -7,30 +7,36 @@ using System.Web.Http;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers {
-    public class ValuesController : ApiController {
+    public class BooksController : ApiController {
         const int InvalidListIndex = -1;
 
         IBooksContext booksContext = FakeBooksContext.Create();
 
-        // GET api/values
+        // GET api/books
         public IEnumerable<Book> GetBooks() {
             return booksContext.Books;
         }
 
-        // GET api/values/5
-        public Book GetBook(int id) {
-            return booksContext.Books.SingleOrDefault(b => b.Id == id);
+        // GET api/books/5
+        public IHttpActionResult GetBook(int id) {
+            var book = GetBookCore(id);
+            if(book == null)
+                return BadRequest();
+            return Ok(book);
         }
 
-        // POST api/values
+        // POST api/books
         [HttpPost]
-        public void CreateBook([FromBody]Book book) {
+        public IHttpActionResult CreateBook([FromBody]Book book) {
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
             booksContext.Books.Add(book);
+            return Ok();
         }
 
-        // PUT api/values/5
+        // PUT api/books/5
         [HttpPut]
-        public void EditBuuk(int id, [FromBody]Book book) {
+        public void EditBook(int id, [FromBody]Book book) {
             if(id != book.Id)
                 return;
             var listIndex = GetBookListIndex(id);
@@ -39,7 +45,7 @@ namespace WebApplication1.Controllers {
             booksContext.Books[listIndex] = book; 
         }
 
-        // DELETE api/values/5
+        // DELETE api/books/5
         public void DeleteBook(int id) {
             var listIndex = GetBookListIndex(id);
             if(listIndex == InvalidListIndex)
@@ -47,8 +53,11 @@ namespace WebApplication1.Controllers {
             booksContext.Books.RemoveAt(listIndex);
         }
 
+        Book GetBookCore(int id) {
+            return booksContext.Books.SingleOrDefault(b => b.Id == id);
+        }
         int GetBookListIndex(int id) {
-            var book = GetBook(id);
+            var book = GetBookCore(id);
             if(book == null)
                 return InvalidListIndex;
             return booksContext.Books.IndexOf(book);

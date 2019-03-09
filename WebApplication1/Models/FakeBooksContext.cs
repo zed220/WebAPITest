@@ -17,7 +17,7 @@ namespace WebApplication1.Models {
             context.Books.Add(new Book() {
                 Id = 0,
                 Caption = "Alice's Adventures in Wonderland",
-                Authors = new List<Author>() {
+                Authors = new[] {
                     new Author() { FirstName = "Lewis", LastName = "Carroll" }
                 },
                 ISBN = "0486275434",//978-0486275437
