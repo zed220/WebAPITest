@@ -32,7 +32,7 @@ namespace WebApplication1.Controllers {
         public HttpResponseMessage GetBookImage([FromUri]int imageId) {
             if(GetBookCore(imageId) == null)
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
-            var path = HttpContext.Current.Server.MapPath($@"..\StoreImages\{imageId}.png");
+            var path = System.Web.Hosting.HostingEnvironment.MapPath($@"~\StoreImages\{imageId}.png");
             if(!File.Exists(path))
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
