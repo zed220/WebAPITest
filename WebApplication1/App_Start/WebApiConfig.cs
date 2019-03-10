@@ -20,6 +20,10 @@ namespace WebApplication1 {
                 name: "Sorted",
                 routeTemplate: "api/{controller}/{sortMode}"
             );
+            config.Routes.MapHttpRoute(
+                name: "image",
+                routeTemplate: "api/{controller}/{imageId}"
+            );
         }
     }
 }

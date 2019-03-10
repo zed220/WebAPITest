@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web;
 using System.Web.Http;
 using WebApplication1.App_Data;
 using WebApplication1.Models;
@@ -16,14 +19,26 @@ namespace WebApplication1.Controllers {
             return booksContext.Books;
         }
 
-        //Get api/books/?sorting
-        [HttpGet]
+        //Get api/books/?sortMode
         public IHttpActionResult GetSortedBooks([FromUri]SortMode sortMode) {
             switch(sortMode) {
                 case SortMode.Title: return Ok(booksContext.Books.OrderBy(x => x.Title));
                 case SortMode.Year: return Ok(booksContext.Books.OrderBy(x => x.Year));
                 default: return BadRequest();
             }
+        }
+
+        //Get api/books/?image
+        public HttpResponseMessage GetBookImage([FromUri]int imageId) {
+            if(GetBookCore(imageId) == null)
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            var path = HttpContext.Current.Server.MapPath($@"..\StoreImages\{imageId}.png");
+            if(!File.Exists(path))
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new ByteArrayContent(File.ReadAllBytes(path));
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+            return result;
         }
 
         // GET api/books/5
