@@ -16,6 +16,16 @@ namespace WebApplication1.Controllers {
             return booksContext.Books;
         }
 
+        //Get api/books/?sorting
+        [HttpGet]
+        public IHttpActionResult GetSortedBooks([FromUri]SortMode sortMode) {
+            switch(sortMode) {
+                case SortMode.Title: return Ok(booksContext.Books.OrderBy(x => x.Title));
+                case SortMode.Year: return Ok(booksContext.Books.OrderBy(x => x.Year));
+                default: return BadRequest();
+            }
+        }
+
         // GET api/books/5
         public IHttpActionResult GetBook(int id) {
             var book = GetBookCore(id);
@@ -70,4 +80,6 @@ namespace WebApplication1.Controllers {
 
         static string GetNotFoundErrorText(int id) => $"Book with Id={id} not found.";
     }
+
+    public enum SortMode { Title, Year }
 }

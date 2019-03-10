@@ -16,6 +16,10 @@ namespace WebApplication1 {
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            config.Routes.MapHttpRoute(
+                name: "Sorted",
+                routeTemplate: "api/{controller}/{sortMode}"
+            );
         }
     }
 }

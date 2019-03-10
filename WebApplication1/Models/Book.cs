@@ -10,7 +10,7 @@ namespace WebApplication1.Models {
         [Range(0, int.MaxValue)]
         public int Id { get; set; } = -1;
         [Required, StringLength(30)]
-        public string Caption { get; set; }
+        public string Title { get; set; }
         [Required, MinLength(1)]
         public Author[] Authors { get; set; }
         [Required, Range(0, 10000)]

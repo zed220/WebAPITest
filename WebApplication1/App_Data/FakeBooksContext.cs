@@ -26,14 +26,25 @@ namespace WebApplication1.App_Data {
             var context = new FakeBooksContext();
             context.Books.Add(new Book() {
                 Id = 0,
-                Caption = "Alice's Adventures in Wonderland",
+                Title = "Alice in Wonderland",
                 Authors = new[] {
                     new Author() { FirstName = "Lewis", LastName = "Carroll" }
                 },
-                ISBN = "0486275434",//978-0486275437
+                ISBN = "0486275434",
                 Pages = 86,
                 Publisher = "Dover Publications",
                 Year = 1993
+            });
+            context.Books.Add(new Book() {
+                Id = 1,
+                Title = "Adventures of Tom Sawyer",
+                Authors = new[] {
+                    new Author() { FirstName = "Mark", LastName = "Twain" }
+                },
+                ISBN = "9781948132824",
+                Pages = 270,
+                Publisher = "SeaWolf Press",
+                Year = 2018
             });
             return context;
         }
