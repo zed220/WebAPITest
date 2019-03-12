@@ -6,6 +6,29 @@ using WebAPIBooks.Models;
 
 namespace WebAPIBooks.App_Data {
     public class FakeBooksContext : IBooksContext {
+        public static readonly Book DefaultBook_0 = new Book() {
+            Id = 0,
+            Title = "Alice in Wonderland",
+            Authors = new[] {
+                new Author() { FirstName = "Lewis", LastName = "Carroll" }
+            },
+            ISBN = "0486275434",
+            Pages = 86,
+            Publisher = "Dover Publications",
+            Year = 1993
+        };
+        public static readonly Book DefaultBook_1 = new Book() {
+            Id = 1,
+            Title = "Adventures of Tom Sawyer",
+            Authors = new[] {
+                new Author() { FirstName = "Mark", LastName = "Twain" }
+            },
+            ISBN = "9781948132824",
+            Pages = 270,
+            Publisher = "SeaWolf Press",
+            Year = 2018
+        };
+
         FakeBooksContext() {
             Books = new List<Book>();
         }
@@ -24,29 +47,13 @@ namespace WebAPIBooks.App_Data {
 
         static IBooksContext CreateWithFakeValues() {
             var context = new FakeBooksContext();
-            context.Books.Add(new Book() {
-                Id = 0,
-                Title = "Alice in Wonderland",
-                Authors = new[] {
-                    new Author() { FirstName = "Lewis", LastName = "Carroll" }
-                },
-                ISBN = "0486275434",
-                Pages = 86,
-                Publisher = "Dover Publications",
-                Year = 1993
-            });
-            context.Books.Add(new Book() {
-                Id = 1,
-                Title = "Adventures of Tom Sawyer",
-                Authors = new[] {
-                    new Author() { FirstName = "Mark", LastName = "Twain" }
-                },
-                ISBN = "9781948132824",
-                Pages = 270,
-                Publisher = "SeaWolf Press",
-                Year = 2018
-            });
+            context.Books.Add(DefaultBook_0);
+            context.Books.Add(DefaultBook_1);
             return context;
+        }
+
+        public static void Test_Clear() {
+            instance = null;
         }
     }
 

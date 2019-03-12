@@ -6,13 +6,18 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Http;
 using WebAPIBooks.App_Data;
 using WebAPIBooks.Models;
 
 namespace WebAPIBooks.Controllers {
     public class BooksController : ApiController {
+        public const string ImageFolderName = "StoreImages";
+
         IBooksContext booksContext = FakeBooksContext.Instance;
+
+        public Func<int, string> Test_GetImagePath;
 
         // GET api/books
         public IHttpActionResult GetBooks() {
@@ -32,7 +37,7 @@ namespace WebAPIBooks.Controllers {
         public HttpResponseMessage GetBookImage([FromUri]int imageId) {
             if(GetBookCore(imageId) == null)
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
-            var path = System.Web.Hosting.HostingEnvironment.MapPath($@"~\Bin\StoreImages\{imageId}.png");
+            var path = GetImagePath(imageId);
             if(!File.Exists(path))
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
@@ -51,7 +56,7 @@ namespace WebAPIBooks.Controllers {
             var file = httpRequest.Files[0];
             if(file.ContentLength == 0)
                 return BadRequest($"File has wrong content.");
-            var path = System.Web.Hosting.HostingEnvironment.MapPath($@"~\Bin\StoreImages\{imageId}.png");
+            var path = GetImagePath(imageId);
             if(File.Exists(path)) {
                 try {
                     File.Delete(path);
@@ -120,6 +125,9 @@ namespace WebAPIBooks.Controllers {
             return booksContext.Books.IndexOf(book);
         }
 
+        string GetImagePath(int imageId) {
+            return HostingEnvironment.IsHosted ? HostingEnvironment.MapPath($@"~\Bin\{ImageFolderName}\{imageId}.png") : Test_GetImagePath(imageId);
+        }
         static string GetNotFoundErrorText(int id) => $"Book with Id={id} not found.";
     }
 
