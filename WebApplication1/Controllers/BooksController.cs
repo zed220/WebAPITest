@@ -15,8 +15,8 @@ namespace WebApplication1.Controllers {
         IBooksContext booksContext = FakeBooksContext.Instance;
 
         // GET api/books
-        public IEnumerable<Book> GetBooks() {
-            return booksContext.Books;
+        public IHttpActionResult GetBooks() {
+            return GetSortedBooks(SortMode.Title);
         }
 
         //Get api/books/?sortMode
@@ -41,7 +41,7 @@ namespace WebApplication1.Controllers {
             return result;
         }
 
-        // GET api/books/5
+        // GET api/books/id
         public IHttpActionResult GetBook(int id) {
             var book = GetBookCore(id);
             if(book == null)
@@ -54,7 +54,6 @@ namespace WebApplication1.Controllers {
         public IHttpActionResult CreateBook([FromBody]Book book) {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
-
             if(GetBookListIndex(book.Id) != booksContext.InvalidListIndex)
                 return BadRequest($"Book with Id={book.Id} already created.");
             booksContext.Books.Add(book);

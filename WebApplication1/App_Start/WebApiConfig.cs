@@ -12,13 +12,13 @@ namespace WebApplication1 {
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                name: "Sorted",
+                routeTemplate: "api/{controller}/{sortMode}",
+                defaults: new { sortMode = RouteParameter.Optional }
             );
             config.Routes.MapHttpRoute(
-                name: "Sorted",
-                routeTemplate: "api/{controller}/{sortMode}"
+                name: "GetById",
+                routeTemplate: "api/{controller}/{id}"
             );
             config.Routes.MapHttpRoute(
                 name: "image",
