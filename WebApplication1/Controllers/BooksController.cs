@@ -28,7 +28,7 @@ namespace WebApplication1.Controllers {
             }
         }
 
-        //Get api/books/?image
+        //Get api/books/?imageId
         public HttpResponseMessage GetBookImage([FromUri]int imageId) {
             if(GetBookCore(imageId) == null)
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -39,6 +39,34 @@ namespace WebApplication1.Controllers {
             result.Content = new ByteArrayContent(File.ReadAllBytes(path));
             result.Content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
             return result;
+        }
+
+        // POST api/books/?imageId
+        public IHttpActionResult SetBookImage([FromUri]int imageId) {
+            if(GetBookCore(imageId) == null)
+                return BadRequest(GetNotFoundErrorText(imageId));
+            var httpRequest = HttpContext.Current.Request;
+            if(httpRequest.Files.Count != 1)
+                return BadRequest($"Files count does not equal 1. Actual is {httpRequest.Files.Count}");
+            var file = httpRequest.Files[0];
+            if(file.ContentLength == 0)
+                return BadRequest($"File has wrong content.");
+            var path = System.Web.Hosting.HostingEnvironment.MapPath($@"~\Bin\StoreImages\{imageId}.png");
+            if(File.Exists(path)) {
+                try {
+                    File.Delete(path);
+                }
+                catch {
+                    return BadRequest($"Image for Book Id={imageId} is Locked.");
+                }
+            }
+            try {
+                file.SaveAs(path);
+            }
+            catch {
+                return BadRequest($"Can not create file for Book Id={imageId}.");
+            }
+            return Ok();
         }
 
         // GET api/books/id
