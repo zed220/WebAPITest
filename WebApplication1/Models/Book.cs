@@ -13,7 +13,7 @@ namespace WebAPIBooks.Models {
         public string Title { get; set; }
         [Required, MinLength(1)]
         public Author[] Authors { get; set; }
-        [Required, Range(0, 10000)]
+        [Required, Range(1, 10000)]
         public int Pages { get; set; }
         [Range(1800, 2019)]
         public int Year { get; set; }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,6 +10,8 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.ModelBinding;
+using System.Web.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebAPIBooks.App_Data;
 using WebAPIBooks.Controllers;
@@ -17,6 +21,19 @@ namespace WebAPIBooksTests {
     [TestClass]
     public class BooksControllerUnitTests {
         BooksController Controller;
+
+        static Book CreateValidBook() =>
+            new Book() {
+                Id = 2,
+                Title = "Chronicles of Amber",
+                Authors = new[] {
+                new Author() { FirstName = "Roger", LastName = "Zelazny" }
+            },
+                ISBN = "0380809060",
+                Pages = 1264,
+                Publisher = "Harper Voyager",
+                Year = 2010
+            };
 
         static string GetImageFilePath(int imageId) => Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), BooksController.ImageFolderName, $"{imageId}.png"));
 
@@ -35,12 +52,10 @@ namespace WebAPIBooksTests {
             Controller = null;
         }
 
-        HttpResponseMessage GetMessage(IHttpActionResult result) => result.ExecuteAsync(new CancellationToken()).Result;
-
         [TestMethod]
         public void GetDefaultBookById() {
             Action<int, Func<Book>> assertAction = (bookId, getOriginalBook) => {
-                var message = GetMessage(Controller.GetBook(bookId));
+                var message = Controller.GetBook(bookId).GetMessage();
                 var book = message.GetContent<Book>();
                 Assert.AreEqual(getOriginalBook(), book);
             };
@@ -50,7 +65,7 @@ namespace WebAPIBooksTests {
         [TestMethod]
         public void GetDefaultBooks_DefaultSortOrder() {
             Action<IHttpActionResult> assertSortByName = result => {
-                var message = GetMessage(result);
+                var message = result.GetMessage();
                 var books = message.GetContent<IEnumerable<Book>>().ToList();
                 Assert.AreEqual(2, books.Count);
                 Assert.AreEqual(FakeBooksContext.DefaultBook_1.Id, books[0].Id);
@@ -61,7 +76,7 @@ namespace WebAPIBooksTests {
         }
         [TestMethod]
         public void GetDefaultBooks_SortByYear() {
-            var message = GetMessage(Controller.GetSortedBooks(SortMode.Year));
+            var message = Controller.GetSortedBooks(SortMode.Year).GetMessage();
             var books = message.GetContent<IEnumerable<Book>>().ToList();
             Assert.AreEqual(2, books.Count);
             Assert.AreEqual(FakeBooksContext.DefaultBook_0.Id, books[0].Id);
@@ -71,7 +86,7 @@ namespace WebAPIBooksTests {
         [TestMethod]
         public void GetBookByInvalidId() {
             Action<int> assertAction = invalidId => {
-                var message = GetMessage(Controller.GetBook(invalidId));
+                var message = Controller.GetBook(invalidId).GetMessage();
                 Assert.ThrowsException<AssertFailedException>(message.GetContent<Book>);
             };
             assertAction(-1);
@@ -96,23 +111,76 @@ namespace WebAPIBooksTests {
             assertAction(0, File.ReadAllBytes(GetImageFilePath(0)));
             assertAction(1, File.ReadAllBytes(GetImageFilePath(1)));
         }
+        [TestMethod]
+        public void AddWrongBook() {
+            Action<int> assertAction = bookId => {
+                var book = CreateValidBook();
+                book.Id = bookId;
+                Controller.ModelState.Clear();
+                Controller.Validate(book);
+                Assert.ThrowsException<AssertFailedException>(() => Controller.CreateBook(book).GetMessage().AssertStatusCode());
+            };
+            assertAction(-1);
+            assertAction(0);
+            assertAction(1);
+        }
+        [TestMethod]
+        public void AddNewBook() {
+            var book = CreateValidBook();
+            book.Id = 2;
+            Controller.ModelState.Clear();
+            Controller.Validate(book);
+            Controller.CreateBook(book).GetMessage().AssertStatusCode();
+            var newBook = Controller.GetBook(2).GetMessage().GetContent<Book>();
+            Assert.IsNotNull(newBook);
+            Assert.AreEqual(book, newBook);
+            Assert.AreEqual(3, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
+        }
 
-        //add new book
+        [TestMethod]
+        public void TryAddInvalidBook() {
+            Action<Action<Book>> assertAction = broke => {
+                var book = CreateValidBook();
+                broke(book);
+                Controller.ModelState.Clear();
+                Controller.Validate(book);
+                Assert.ThrowsException<AssertFailedException>(() => Controller.CreateBook(book).GetMessage().AssertStatusCode());
+            };
+            assertAction(b => { b.Id = -1; });
+            assertAction(b => { b.Title = null; });
+            assertAction(b => { b.Title = new string('c', 31); });
+            assertAction(b => { b.Pages = 0; });
+            assertAction(b => { b.Pages = 10001; });
+            assertAction(b => { b.Year = 1799; });
+            assertAction(b => { b.Year = DateTime.Now.Year + 1; });
+            assertAction(b => { b.Publisher = new string('c', 31); });
+            assertAction(b => { b.Authors = null; });
+            assertAction(b => { b.Authors = new Author[0]; });
+            assertAction(b => { b.Authors[0].FirstName = null; });
+            assertAction(b => { b.Authors[0].FirstName = new string('c', 21); });
+            assertAction(b => { b.Authors[0].LastName = null; });
+            assertAction(b => { b.Authors[0].LastName = new string('c', 21); });
+            //ISBN
+        }
+
         //modify existion book
         //add image
         //modify image
     }
 
     public static class BooksControllerExtensions {
+        public static HttpResponseMessage GetMessage(this IHttpActionResult result) => result.ExecuteAsync(new CancellationToken()).Result;
         public static T GetContent<T>(this HttpResponseMessage message) {
-            if(!message.IsSuccessStatusCode)
-                Assert.Fail($"Bad Request. Code={message.StatusCode}, Text={message.Content?.ReadAsAsync<HttpError>().Result.Message}");
+            message.AssertStatusCode();
             return message.Content.ReadAsAsync<T>().Result;
         }
         public static byte[] GetByteArrayContent(this HttpResponseMessage message) {
+            message.AssertStatusCode();
+            return message.Content.ReadAsByteArrayAsync().Result;
+        }
+        public static void AssertStatusCode(this HttpResponseMessage message) {
             if(!message.IsSuccessStatusCode)
                 Assert.Fail($"Bad Request. Code={message.StatusCode}, Text={message.Content?.ReadAsAsync<HttpError>().Result.Message}");
-            return message.Content.ReadAsByteArrayAsync().Result;
         }
     }
 }
