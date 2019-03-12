@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-using WebApplication1.App_Code;
+using WebAPIBooks.App_Code;
 
-namespace WebApplication1.Models {
+namespace WebAPIBooks.Models {
     public class Book {
         [Range(0, int.MaxValue)]
         public int Id { get; set; } = -1;

@@ -7,10 +7,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
-using WebApplication1.App_Data;
-using WebApplication1.Models;
+using WebAPIBooks.App_Data;
+using WebAPIBooks.Models;
 
-namespace WebApplication1.Controllers {
+namespace WebAPIBooks.Controllers {
     public class BooksController : ApiController {
         IBooksContext booksContext = FakeBooksContext.Instance;
 

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
-namespace WebApplication1.App_Code {
+namespace WebAPIBooks.App_Code {
     public static class Validator_ISBN {
         public static ValidationResult Check(object value, ValidationContext context) {
             return ValidationResult.Success;

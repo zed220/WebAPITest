@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using WebApplication1.Models;
+using WebAPIBooks.Models;
 
-namespace WebApplication1.App_Data {
+namespace WebAPIBooks.App_Data {
     public class FakeBooksContext : IBooksContext {
         FakeBooksContext() {
             Books = new List<Book>();
