@@ -35,7 +35,23 @@ namespace WebAPIBooksTests {
                 Year = 2010
             };
 
-        static string GetImageFilePath(int imageId) => Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), BooksController.ImageFolderName, $"{imageId}.png"));
+        string GetImageFilePath(int imageId) {
+            if(restoreImagesAction == null) {
+                byte[] firstImage = File.ReadAllBytes(GetImagePathCore(0));
+                byte[] secondImage = File.ReadAllBytes(GetImagePathCore(1));
+
+                restoreImagesAction = new Action(() => {
+                    File.WriteAllBytes(GetImagePathCore(0), firstImage);
+                    File.WriteAllBytes(GetImagePathCore(1), secondImage);
+                });
+            }
+            return GetImagePathCore(imageId);
+        }
+        static string GetImagePathCore(int imageId) {
+            return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), BooksController.ImageFolderName, $"{imageId}.png"));
+        }
+        
+        Action restoreImagesAction;
 
         [TestInitialize]
         public void SetUp() {
@@ -47,6 +63,8 @@ namespace WebAPIBooksTests {
         }
         [TestCleanup]
         public void TearDown() {
+            restoreImagesAction?.Invoke();
+            restoreImagesAction = null;
             FakeBooksContext.Test_Clear();
             Controller.Dispose();
             Controller = null;
@@ -177,9 +195,19 @@ namespace WebAPIBooksTests {
         public void ModifyBook() {
             var book = CreateValidBook();
             book.Id = 0;
-            Controller.EditBook(0, book);
+            Controller.EditBook(0, book).GetMessage().AssertStatusCode();
+            var newBook = Controller.GetBook(0).GetMessage().GetContent<Book>();
+            Assert.AreEqual(book, newBook);
+            Assert.AreEqual(2, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
         }
-        //modify existion book
+        [TestMethod]
+        public void AddInvalidImage() {
+
+        }
+        [TestMethod]
+        public void AddImage() {
+
+        }
         //add image
         //modify image
     }

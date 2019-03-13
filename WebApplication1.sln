@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPIBooks", "WebApplication1\WebAPIBooks.csproj", "{8FBD9FC7-3C41-44EB-A812-2C49043FD347}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPIBooksTests", "WebAPIBooksTests\WebAPIBooksTests.csproj", "{07502501-1B90-48F3-AE41-163AC0157B39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8FBD9FC7-3C41-44EB-A812-2C49043FD347} = {8FBD9FC7-3C41-44EB-A812-2C49043FD347}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
