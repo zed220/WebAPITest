@@ -31,7 +31,7 @@ Create new book (id must be unique):
 
 <b>api/books</b>
 
-Create new book's image by id=1:
+Create new or replace old book's image by id=1:
 
 <b>api/books?imageId=1</b>
 
