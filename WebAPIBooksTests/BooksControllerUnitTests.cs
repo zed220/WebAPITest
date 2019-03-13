@@ -9,7 +9,9 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
+using System.Web;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -200,16 +202,9 @@ namespace WebAPIBooksTests {
             Assert.AreEqual(book, newBook);
             Assert.AreEqual(2, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
         }
-        [TestMethod]
-        public void AddInvalidImage() {
-
-        }
-        [TestMethod]
-        public void AddImage() {
-
-        }
-        //add image
+        //add new image
         //modify image
+        //try add invalid image
     }
 
     public static class BooksControllerExtensions {
