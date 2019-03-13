@@ -52,7 +52,7 @@ namespace WebAPIBooksTests {
         static string GetImagePathCore(int imageId) {
             return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), BooksController.ImageFolderName, $"{imageId}.png"));
         }
-        
+
         Action restoreImagesAction;
 
         [TestInitialize]
@@ -163,7 +163,7 @@ namespace WebAPIBooksTests {
             var newBook = Controller.GetBook(2).GetMessage().GetContent<Book>();
             Assert.IsNotNull(newBook);
             Assert.AreEqual(book, newBook);
-            Assert.AreEqual(newBook.ISBN.Replace("-",""), newBook.ISBN);
+            Assert.AreEqual(newBook.ISBN.Replace("-", ""), newBook.ISBN);
             Assert.AreEqual(3, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
         }
 
@@ -229,6 +229,21 @@ namespace WebAPIBooksTests {
             modifyAction("9781948132824-");
             modifyAction("-9781948132824-");
             modifyAction("-9--7-8--1-9---4--8-1-3-2--8-24-");
+        }
+        [TestMethod]
+        public void TryDeleteInvalidBook() {
+            Action<int> deleteAction = id => {
+                Assert.ThrowsException<AssertFailedException>(() => Controller.DeleteBook(id).GetMessage().AssertStatusCode());
+            };
+            deleteAction(-1);
+            deleteAction(3);
+        }
+        [TestMethod]
+        public void DeleteBook() {
+            Controller.DeleteBook(0).GetMessage().AssertStatusCode();
+            var books = Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList();
+            Assert.AreEqual(1, books.Count);
+            Assert.AreEqual(FakeBooksContext.DefaultBook_1, books.Single());
         }
         //add new image
         //modify image
