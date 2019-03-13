@@ -47,3 +47,6 @@ Change existing book's image by id=1:
 
 <b>[DELETE queries]</b>
 
+Delete book by id=1:
+
+<b>api/books/1</b>
