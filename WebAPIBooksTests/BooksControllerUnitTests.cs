@@ -145,7 +145,6 @@ namespace WebAPIBooksTests {
         [TestMethod]
         public void AddNewBook() {
             var book = CreateValidBook();
-            book.Id = 2;
             Controller.ModelState.Clear();
             Controller.Validate(book);
             Controller.CreateBook(book).GetMessage().AssertStatusCode();
@@ -154,6 +153,20 @@ namespace WebAPIBooksTests {
             Assert.AreEqual(book, newBook);
             Assert.AreEqual(3, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
         }
+        [TestMethod]
+        public void AddNewBook_FixISBN() {
+            var book = CreateValidBook();
+            book.ISBN = "-0---3-8-0-8--0-9-0-6-0--";
+            Controller.ModelState.Clear();
+            Controller.Validate(book);
+            Controller.CreateBook(book).GetMessage().AssertStatusCode();
+            var newBook = Controller.GetBook(2).GetMessage().GetContent<Book>();
+            Assert.IsNotNull(newBook);
+            Assert.AreEqual(book, newBook);
+            Assert.AreEqual(newBook.ISBN.Replace("-",""), newBook.ISBN);
+            Assert.AreEqual(3, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
+        }
+
         void AssertInvalidBookAllCases(Action<Book> controllerAction) {
             Action<Action<Book>> assertAction = broke => {
                 var book = CreateValidBook();
@@ -176,7 +189,8 @@ namespace WebAPIBooksTests {
             assertAction(b => { b.Authors[0].FirstName = new string('c', 21); });
             assertAction(b => { b.Authors[0].LastName = null; });
             assertAction(b => { b.Authors[0].LastName = new string('c', 21); });
-            //ISBN
+            assertAction(b => { b.ISBN += "1"; });
+            assertAction(b => { b.ISBN = b.ISBN.Replace("0", "a"); });
         }
         [TestMethod]
         public void TryAddInvalidBook() {
@@ -195,12 +209,26 @@ namespace WebAPIBooksTests {
         }
         [TestMethod]
         public void ModifyBook() {
-            var book = CreateValidBook();
-            book.Id = 0;
-            Controller.EditBook(0, book).GetMessage().AssertStatusCode();
-            var newBook = Controller.GetBook(0).GetMessage().GetContent<Book>();
-            Assert.AreEqual(book, newBook);
-            Assert.AreEqual(2, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
+            Action<string> modifyAction = isbn => {
+                var book = CreateValidBook();
+                book.Id = 0;
+                book.ISBN = isbn;
+                Controller.ModelState.Clear();
+                Controller.Validate(book);
+                Controller.EditBook(0, book).GetMessage().AssertStatusCode();
+                var newBook = Controller.GetBook(0).GetMessage().GetContent<Book>();
+                Assert.AreEqual(book, newBook);
+                Assert.AreEqual(2, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
+                Assert.AreEqual(isbn.Replace("-", ""), newBook.ISBN);
+            };
+            modifyAction("0380809060");
+            modifyAction("0380809060-");
+            modifyAction("-0380809060-");
+            modifyAction("-0-3-8-0-8---0-9-0-6-0-");
+            modifyAction("9781948132824");
+            modifyAction("9781948132824-");
+            modifyAction("-9781948132824-");
+            modifyAction("-9--7-8--1-9---4--8-1-3-2--8-24-");
         }
         //add new image
         //modify image

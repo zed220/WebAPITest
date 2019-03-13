@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Http;
+using WebAPIBooks.App_Code;
 using WebAPIBooks.App_Data;
 using WebAPIBooks.Models;
 
@@ -91,6 +92,7 @@ namespace WebAPIBooks.Controllers {
                 return BadRequest(ModelState);
             if(GetBookListIndex(book.Id) != booksContext.InvalidListIndex)
                 return BadRequest($"Book with Id={book.Id} already created.");
+            book.ISBN = Validator_ISBN.CorrectISBN(book.ISBN);
             booksContext.Books.Add(book);
 
             return Ok();
@@ -105,6 +107,7 @@ namespace WebAPIBooks.Controllers {
                 return BadRequest($"Target Id={id} does not equal book's Id={book.Id}.");
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
+            book.ISBN = Validator_ISBN.CorrectISBN(book.ISBN);
             var listIndex = GetBookListIndex(id);
             if(listIndex == booksContext.InvalidListIndex)
                 return BadRequest(GetNotFoundErrorText(id));
