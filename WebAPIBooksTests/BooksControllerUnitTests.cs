@@ -51,7 +51,6 @@ namespace WebAPIBooksTests {
             Controller.Dispose();
             Controller = null;
         }
-
         [TestMethod]
         public void GetDefaultBookById() {
             Action<int, Func<Book>> assertAction = (bookId, getOriginalBook) => {
@@ -82,7 +81,6 @@ namespace WebAPIBooksTests {
             Assert.AreEqual(FakeBooksContext.DefaultBook_0.Id, books[0].Id);
             Assert.AreEqual(FakeBooksContext.DefaultBook_1.Id, books[1].Id);
         }
-
         [TestMethod]
         public void GetBookByInvalidId() {
             Action<int> assertAction = invalidId => {
@@ -136,15 +134,13 @@ namespace WebAPIBooksTests {
             Assert.AreEqual(book, newBook);
             Assert.AreEqual(3, Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList().Count);
         }
-
-        [TestMethod]
-        public void TryAddInvalidBook() {
+        void AssertInvalidBookAllCases(Action<Book> controllerAction) {
             Action<Action<Book>> assertAction = broke => {
                 var book = CreateValidBook();
                 broke(book);
                 Controller.ModelState.Clear();
                 Controller.Validate(book);
-                Assert.ThrowsException<AssertFailedException>(() => Controller.CreateBook(book).GetMessage().AssertStatusCode());
+                Assert.ThrowsException<AssertFailedException>(() => controllerAction(book));
             };
             assertAction(b => { b.Id = -1; });
             assertAction(b => { b.Title = null; });
@@ -162,7 +158,27 @@ namespace WebAPIBooksTests {
             assertAction(b => { b.Authors[0].LastName = new string('c', 21); });
             //ISBN
         }
-
+        [TestMethod]
+        public void TryAddInvalidBook() {
+            AssertInvalidBookAllCases(book => Controller.CreateBook(book).GetMessage().AssertStatusCode());
+        }
+        [TestMethod]
+        public void TryModifyInvalidBook() {
+            AssertInvalidBookAllCases(book => Controller.EditBook(-1, book).GetMessage().AssertStatusCode());
+            AssertInvalidBookAllCases(book => {
+                if(book.Id != -1)
+                    book.Id = 0;
+                Controller.ModelState.Clear();
+                Controller.Validate(book);
+                Controller.EditBook(0, book).GetMessage().AssertStatusCode();
+            });
+        }
+        [TestMethod]
+        public void ModifyBook() {
+            var book = CreateValidBook();
+            book.Id = 0;
+            Controller.EditBook(0, book);
+        }
         //modify existion book
         //add image
         //modify image

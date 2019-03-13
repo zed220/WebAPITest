@@ -85,6 +85,8 @@ namespace WebAPIBooks.Controllers {
         // POST api/books
         [HttpPost]
         public IHttpActionResult CreateBook([FromBody]Book book) {
+            if(book == null)
+                return BadRequest("Content is empty");
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
             if(GetBookListIndex(book.Id) != booksContext.InvalidListIndex)
@@ -97,8 +99,12 @@ namespace WebAPIBooks.Controllers {
         // PUT api/books/5
         [HttpPut]
         public IHttpActionResult EditBook(int id, [FromBody]Book book) {
+            if(book == null)
+                return BadRequest("Content is empty");
             if(id != book.Id)
                 return BadRequest($"Target Id={id} does not equal book's Id={book.Id}.");
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
             var listIndex = GetBookListIndex(id);
             if(listIndex == booksContext.InvalidListIndex)
                 return BadRequest(GetNotFoundErrorText(id));

@@ -12,13 +12,14 @@ namespace WebAPIBooks {
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+            config.Routes.MapHttpRoute(
                 name: "Sorted",
                 routeTemplate: "api/{controller}/{sortMode}",
                 defaults: new { sortMode = RouteParameter.Optional }
-            );
-            config.Routes.MapHttpRoute(
-                name: "GetById",
-                routeTemplate: "api/{controller}/{id}"
             );
             config.Routes.MapHttpRoute(
                 name: "image",
