@@ -44,3 +44,6 @@ Edit existing book by id=1:
 Change existing book's image by id=1:
 
 <b>api/books/ImageId=1</b>
+
+<b>[DELETE queries]</b>
+
