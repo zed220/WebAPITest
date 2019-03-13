@@ -27,7 +27,7 @@ Get book image by id=1:
 
 <b>[POST queries]</b>
 
-Create new book (id must been unique):
+Create new book (id must be unique):
 
 <b>api/books</b>
 
