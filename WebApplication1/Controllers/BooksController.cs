@@ -59,12 +59,8 @@ namespace WebAPIBooks.Controllers {
                 return BadRequest($"File has wrong content.");
             var path = GetImagePath(imageId);
             if(File.Exists(path)) {
-                try {
-                    File.Delete(path);
-                }
-                catch {
-                    return BadRequest($"Image for Book Id={imageId} is Locked.");
-                }
+                if(!TryDeleteExistingImage(path))
+                    return BadRequest(GetImageLockedErrorText(imageId));
             }
             try {
                 file.SaveAs(path);
@@ -120,6 +116,11 @@ namespace WebAPIBooks.Controllers {
             var listIndex = GetBookListIndex(id);
             if(listIndex == booksContext.InvalidListIndex)
                 return BadRequest(GetNotFoundErrorText(id));
+            var path = GetImagePath(id);
+            if(File.Exists(path)) {
+                if(!TryDeleteExistingImage(path))
+                    return BadRequest(GetImageLockedErrorText(id));
+            }
             booksContext.Books.RemoveAt(listIndex);
             return Ok();
         }
@@ -134,10 +135,21 @@ namespace WebAPIBooks.Controllers {
             return booksContext.Books.IndexOf(book);
         }
 
+        bool TryDeleteExistingImage(string path) {
+            try {
+                File.Delete(path);
+            }
+            catch {
+                return false;
+            }
+            return true;
+        }
+
         string GetImagePath(int imageId) {
             return HostingEnvironment.IsHosted ? HostingEnvironment.MapPath($@"~\Bin\{ImageFolderName}\{imageId}.png") : Test_GetImagePath(imageId);
         }
         static string GetNotFoundErrorText(int id) => $"Book with Id={id} not found.";
+        static string GetImageLockedErrorText(int imageId) => $"Image for Book Id={imageId} is Locked.";
     }
 
     public enum SortMode { Title, Year }

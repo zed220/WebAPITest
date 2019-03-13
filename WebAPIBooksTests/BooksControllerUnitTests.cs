@@ -240,14 +240,18 @@ namespace WebAPIBooksTests {
         }
         [TestMethod]
         public void DeleteBook() {
+            var path = GetImageFilePath(0);
+            Assert.IsTrue(File.Exists(path));
             Controller.DeleteBook(0).GetMessage().AssertStatusCode();
+            Assert.IsFalse(File.Exists(path));
             var books = Controller.GetBooks().GetMessage().GetContent<IEnumerable<Book>>().ToList();
             Assert.AreEqual(1, books.Count);
             Assert.AreEqual(FakeBooksContext.DefaultBook_1, books.Single());
         }
         //add new image
-        //modify image
+        //modify existing image
         //try add invalid image
+        //tests with real browser
     }
 
     public static class BooksControllerExtensions {
