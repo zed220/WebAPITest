@@ -1,6 +1,6 @@
 # WebAPITest
 
-Usage:
+Books API Usage:
 
 <b>[GET queries]</b>
 
@@ -24,7 +24,6 @@ Get book image by id=1:
 
 <b>api/books?imageId=1</b>
 
-
 <b>[POST queries]</b>
 
 Create new book (id must be unique):
@@ -46,3 +45,11 @@ Edit existing book by id=1:
 Delete book by id=1:
 
 <b>api/books/1</b>
+
+RPN API Usage:
+
+<b>[GET queries]</b>
+
+Get result by string expression "1 2 +" (use %20 for " " and %2B for "+" symbols):
+
+<b>api/rpn?expression=1%202%20%2B</b>
