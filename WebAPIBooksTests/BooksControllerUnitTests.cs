@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -252,21 +251,5 @@ namespace WebAPIBooksTests {
         //modify existing image
         //try add invalid image
         //tests with real browser
-    }
-
-    public static class BooksControllerExtensions {
-        public static HttpResponseMessage GetMessage(this IHttpActionResult result) => result.ExecuteAsync(new CancellationToken()).Result;
-        public static T GetContent<T>(this HttpResponseMessage message) {
-            message.AssertStatusCode();
-            return message.Content.ReadAsAsync<T>().Result;
-        }
-        public static byte[] GetByteArrayContent(this HttpResponseMessage message) {
-            message.AssertStatusCode();
-            return message.Content.ReadAsByteArrayAsync().Result;
-        }
-        public static void AssertStatusCode(this HttpResponseMessage message) {
-            if(!message.IsSuccessStatusCode)
-                Assert.Fail($"Bad Request. Code={message.StatusCode}, Text={message.Content?.ReadAsAsync<HttpError>().Result.Message}");
-        }
     }
 }
