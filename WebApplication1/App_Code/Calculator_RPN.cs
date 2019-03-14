@@ -47,7 +47,7 @@ namespace WebAPIBooks.App_Code {
                 case '*':
                     processMethod = (v2, v1) => v1 * v2;
                     return true;
-                case '\\':
+                case '/':
                     processMethod = (v2, v1) => v1 / v2;
                     return true;
                 case '^':
