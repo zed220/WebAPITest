@@ -12,8 +12,9 @@ namespace WebAPIBooks.Controllers {
         //" "=%20, "+"=%2B
         public IHttpActionResult Get(string expression) {
             var result = Calculator_RPN.Calculate(expression);
-            return BadRequest();
-            //return RPN_Calculator;
+            if(!result.IsValid)
+                return BadRequest();
+            return Ok(result.Result);
         }
     }
 }
